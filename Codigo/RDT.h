@@ -30,9 +30,7 @@ public:
   static const int max_size_msg = 500;
 
 };
-
-
-
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 struct Package{
   unsigned int secuence;
   unsigned int flujo;
@@ -58,7 +56,7 @@ struct Package{
     this->payload = this->payload.substr(0,this->payload.length()-1); 
   }
 };
-
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 struct Flujo{
   unsigned int sec_fin = -1;
   unsigned int num_flujo = -1;
@@ -113,7 +111,7 @@ struct Flujo{
   }
 
 };
-
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class RDT{
 public:
   const unsigned int MAX_FLUJOS = 999;
@@ -143,7 +141,7 @@ public:
     VEC_FLUJOS_IN = new vector<Flujo*>(MAX_FLUJOS,nullptr);
   }
 };
-
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 string RDT::PadZeros(int number, int longitud){
   string num_letra = std::to_string(number);
   for (int i = num_letra.length(); i < longitud; ++i)
@@ -151,7 +149,7 @@ string RDT::PadZeros(int number, int longitud){
   
   return num_letra;
 }
-
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 int RDT::GenChecksum(string cadena){// TODO
   int suma=0;
 	for (int i = 0; i < 6; i++){
@@ -160,18 +158,19 @@ int RDT::GenChecksum(string cadena){// TODO
 	suma=suma%CT::divisor;
 	return suma;
 }
-
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool RDT::VerificaChecksum(string cadena,int checksum){
   int suma=0;
 	for (int i = 0; i < 6; i++){
 		suma+=int(cadena[i]);
 	}
 	suma=suma%CT::divisor;
-	if(suma==checksum)
+  string temp=cadena.substr(cadena.size()-2,cadena.size()-1);
+	if(suma==atoi(temp.c_str()))
 		return true;
 	return false;
 }
-
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void RDT::PreparacionMensaje(string mensaje){
   string flag_fin = "0";
   std::vector<string> vec_paquete;
@@ -196,7 +195,7 @@ void RDT::PreparacionMensaje(string mensaje){
   }
   FLUJO_OUT_ACTUAL++;
 }
-
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool RDT::RecepcionPaquete(string mensaje){
   //TODO Verificar Checksum
   //Crear Paquete
