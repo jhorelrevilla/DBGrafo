@@ -129,7 +129,7 @@ public:
 
   string PadZeros(int number, int longitud);
   int GenChecksum(string cadena);
-  bool VerificaChecksum(string cadena,int checksum);
+  bool VerificaChecksum(string cadena);
 
   void PreparacionMensaje(string mensaje);
   bool RecepcionPaquete(string Paquete);
@@ -159,7 +159,7 @@ int RDT::GenChecksum(string cadena){// TODO
 	return suma;
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool RDT::VerificaChecksum(string cadena,int checksum){
+bool RDT::VerificaChecksum(string cadena){
   int suma=0;
 	for (int i = 0; i < 6; i++){
 		suma+=int(cadena[i]);
