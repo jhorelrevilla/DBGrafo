@@ -1,22 +1,16 @@
 //Utilidades RDT
-
 #include <iostream>
 #include <string>
 #include <vector>
 #include <map>
 #include <queue>
 #include <math.h>
-
 #include <fstream>
-
-using std::string; using std::cout;
-using std::queue;
-using std::vector;
+using namespace std;
 
 class RDT;
 
-class CT //Constantes
-{
+class CT {//Constantes
 public:
   static const int ind_secuencia = 0; //indice secuencia
   static const int pos_secuencia = 5; //primeros 5 bytes capa transporte
@@ -39,27 +33,22 @@ public:
 
 
 
-struct Package
-{
+struct Package{
   unsigned int secuence;
   unsigned int flujo;
   unsigned int sec_flujo;
   bool flag;
   string payload;
 
-  Package(unsigned int secuence,
-  unsigned int flujo,
-  unsigned int sec_flujo,
-  string payload)
-  {
+  Package(unsigned int secuence,unsigned int flujo,unsigned int sec_flujo,
+  string payload){
     this->secuence = secuence;
     this->flujo = flujo;
     this->sec_flujo = sec_flujo;
     this->payload = payload;
   }
 
-  Package(string paquete)
-  {
+  Package(string paquete){
     this->secuence = stoi(paquete.substr(CT::ind_secuencia, CT::pos_secuencia));
     this->flujo = stoi(paquete.substr(CT::ind_flujo, CT::pos_flujo));
     this->sec_flujo = stoi(paquete.substr(CT::ind_sec_flujo, CT::pos_sec_en_flujo));
@@ -70,86 +59,62 @@ struct Package
   }
 };
 
-struct Flujo
-{
+struct Flujo{
   unsigned int sec_fin = -1;
   unsigned int num_flujo = -1;
   unsigned int contador = -1;
 
   std::map<int, Package*> map_paquetes;
 
-  Flujo(unsigned int num_flujo)
-  {
+  Flujo(unsigned int num_flujo){
     this->num_flujo = num_flujo;
   }
 
-  Flujo(unsigned int sec_ini,
-  unsigned int sec_fin,
-  unsigned int flujo)
-  {
+  Flujo(unsigned int sec_ini,unsigned int sec_fin,unsigned int flujo){
     this->sec_fin;
     this->num_flujo;
   }
 
-  ~Flujo()
-  {
+  ~Flujo(){
     for (int i = 0; i< sec_fin; ++i)
-    {
        delete map_paquetes[i];
-    }
   }
 
-  bool InsertarPackage(Package* paquete)
-  {
+  bool InsertarPackage(Package* paquete){
     if (paquete->flujo != num_flujo)
       return false;
-    else
-    {
-      if (map_paquetes.count(paquete->sec_flujo))
-      {
-        //paquete existe
+    else{
+      if (map_paquetes.count(paquete->sec_flujo))//paquete existe
         return true;
-      }
-      else
-      {
+      else{
         map_paquetes[paquete->sec_flujo] = paquete;
         contador++;
         //Actualizar atributos de Flujo
-        if (paquete->flag == 1)
-        { //Paquete final de flujo
+        if (paquete->flag == 1) //Paquete final de flujo
           this->sec_fin = paquete->sec_flujo;
-        }
         return true;
       }
     }
   }
 
-  string ExtraerMensaje()
-  {
+  string ExtraerMensaje(){
     string mensaje ="";
-    if (contador != sec_fin)
-    { //Mensaje aun incompleto
+    if (contador != sec_fin) //Mensaje aun incompleto
       return "Error";
-    }
-    else
-    {
+    else{
       for (int i = 0; i < sec_fin+1; ++i)
-      {
         mensaje+= map_paquetes[i]->payload;
-      }
     }
     return mensaje;  
   }
 
-  bool IsCompleto()
-  {
+  bool IsCompleto(){
     return contador == sec_fin;
   }
 
 };
 
-class RDT
-{
+class RDT{
 public:
   const unsigned int MAX_FLUJOS = 999;
   const unsigned int MAX_SECUENCIAS = 99999;
@@ -166,13 +131,12 @@ public:
 
   string PadZeros(int number, int longitud);
   int GenChecksum(string cadena);
-  bool VerificaChecksum(string cadena);
+  bool VerificaChecksum(string cadena,int checksum);
 
   void PreparacionMensaje(string mensaje);
   bool RecepcionPaquete(string Paquete);
   
-  RDT()
-  {
+  RDT(){
     VEC_FLUJOS_OUT = new vector<Flujo*>(MAX_FLUJOS,nullptr);
     VEC_SECUENCIAS_OUT = new vector<string>(MAX_SECUENCIAS,"");
 
@@ -180,8 +144,7 @@ public:
   }
 };
 
-string RDT::PadZeros(int number, int longitud)
-{
+string RDT::PadZeros(int number, int longitud){
   string num_letra = std::to_string(number);
   for (int i = num_letra.length(); i < longitud; ++i)
     num_letra = "0" + num_letra;
@@ -189,33 +152,41 @@ string RDT::PadZeros(int number, int longitud)
   return num_letra;
 }
 
-int RDT::GenChecksum(string cadena)
-{// TODO
-  return 0;
+int RDT::GenChecksum(string cadena){// TODO
+  int suma=0;
+	for (int i = 0; i < 6; i++){
+		suma+=int(cadena[i]);
+	}
+	suma=suma%CT::divisor;
+	return suma;
 }
 
+bool RDT::VerificaChecksum(string cadena,int checksum){
+  int suma=0;
+	for (int i = 0; i < 6; i++){
+		suma+=int(cadena[i]);
+	}
+	suma=suma%CT::divisor;
+	if(suma==checksum)
+		return true;
+	return false;
+}
 
-void RDT::PreparacionMensaje(string mensaje)
-{
+void RDT::PreparacionMensaje(string mensaje){
   string flag_fin = "0";
   std::vector<string> vec_paquete;
- 
   int num_secuencias = ceil ( mensaje.length() / (float) CT::max_size_msg);
-
   // i es secuencia en flujo
-  for (int i = 0; i < num_secuencias; ++i)
-  {
+  for (int i = 0; i < num_secuencias; ++i){
     if (i == num_secuencias -1 )
       flag_fin = "1";
-
     string cadena = "";
     string temp = mensaje.substr(i*CT::max_size_msg, CT::max_size_msg);
     
     cadena += PadZeros(SECUENCIA_OUT_ACTUAL, CT::pos_secuencia) +
               PadZeros(FLUJO_OUT_ACTUAL, CT::pos_flujo) +
               PadZeros(i, CT::pos_sec_en_flujo) +
-              flag_fin +
-              temp;
+              flag_fin +temp;
     cadena += std::to_string(GenChecksum(cadena));
     //Agregar al vector de secuencias de salida para posible uso posterior
     //llevar control de numero secuencia inicial y final 
@@ -226,8 +197,7 @@ void RDT::PreparacionMensaje(string mensaje)
   FLUJO_OUT_ACTUAL++;
 }
 
-bool RDT::RecepcionPaquete(string mensaje)
-{
+bool RDT::RecepcionPaquete(string mensaje){
   //TODO Verificar Checksum
   //Crear Paquete
   Package* pkg = new Package (mensaje);
