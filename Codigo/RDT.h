@@ -8,7 +8,7 @@
 #include <vector>
 #include <stack>
 #include <math.h>
-
+#include <thread>
 #include <fstream>
 
 using namespace std;
@@ -179,6 +179,7 @@ public:
 
   string PrepararACK(); //TODO
   vector<int> LeerACK(string);
+  
   RDT()
   {
     VEC_FLUJOS_OUT = new vector<Flujo*>(MAX_FLUJOS,nullptr);
@@ -296,12 +297,12 @@ bool RDT::RecepcionPaquete(string mensaje){
 }
 
 string RDT::PrepararACK(){
-  string temp="AA",v="-----";
+  string temp="AA",v="000-1";
   for (auto i: hist){
     temp+=i;
   }
-  if(hist.size()<99){
-    for (int i = hist.size(); i < 99; i++){
+  if(hist.size()<95){
+    for (int i = hist.size(); i < 95; i++){
       temp+=v;
     }
   }
@@ -312,8 +313,8 @@ string RDT::PrepararACK(){
 vector<int> RDT::LeerACK(string temp){
   vector<int>f;
   int i;
-  i=atoi ( temp.substr(0,4).c_str());
-  for (int w = 1; w < 98; i++,w++){
+  i=atoi ( temp.substr(0,5).c_str());
+  for (int w = 1; w < 94; i++,w++){
     int j=atoi ( temp.substr(5*w,5).c_str());
     if(i!=j){
       f.push_back(j);
