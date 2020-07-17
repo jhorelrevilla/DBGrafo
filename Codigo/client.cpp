@@ -63,9 +63,7 @@ string EsperaPorMensaje()
 
     while (!completo)
     {
-        n = recvfrom(sockfd, (char *)buffer, MAXLINE,
-                                MSG_WAITALL, (struct sockaddr *) &servaddr,
-                                &len);
+        n = recvfrom(sockfd, (char *)buffer, MAXLINE,MSG_WAITALL, (struct sockaddr *) &servaddr,&len);
         if (Rdt.RecepcionPaquete(string(buffer)) )
         {
             cout << "\nPaquete Recibido";
